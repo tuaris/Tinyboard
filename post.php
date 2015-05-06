@@ -248,6 +248,29 @@ if (isset($_POST['delete'])) {
 		}
 	}
 		
+	// Check SpammerSlapper
+	$data = array(
+		'message' => $_POST['body'],
+		'subject' => $_POST['subject'],
+		'emailAddress' => $_POST['email'],
+		'username' => $_POST['name'],
+		'remoteAddress' => $_SERVER['REMOTE_ADDR']
+	);
+	$options = array(
+		'CHECK_SPAMASSASIN' => true,
+		'CHECK_PROXY' => true,
+		'CHECK_HTTPBL' => true,
+		'CHECK_FORUMSPAM' => true,
+		'CHECK_EMAIL' => true,
+		'CHECK_DBLORG' => true,
+		'CHECK_SPAMHAUSDBL' => true
+	);
+	require_once('inc/lib/spammerslapper/spammerslapperlib.php');
+	$result = spammerslapper_check($config['spammerslapper_key'], $data, $options);
+	if($result->SPAM){
+		// SPAmmer Slapper has detected SPAM
+		error($result->Message);
+	}
 	
 	// Check for an embed field
 	if ($config['enable_embedding'] && isset($_POST['embed']) && !empty($_POST['embed'])) {
